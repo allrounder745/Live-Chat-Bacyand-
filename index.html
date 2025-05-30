@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>💬 Premium Live Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    #chatBox {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 20px;
+    }
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      padding-right: 10px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.3);
+      scrollbar-width: thin;
+      scrollbar-color: #888 transparent;
+    }
+    #messages p {
+      margin-bottom: 8px;
+      text-align: left;
+    }
+    #inputArea {
+      display: flex;
+      gap: 10px;
+    }
+    input, button {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 1rem;
+    }
+    #msgInput {
+      flex: 1;
+    }
+    button {
+      background-color: #00c6ff;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #0079a1;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>💬 Premium Live Chat</h2>
+  <div id="chatBox">
+    <div id="messages"></div>
+    <div id="inputArea">
+      <input id="msgInput" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io("https://live-chat-9rtk.onrender.com");
+    let username = "";
+
+    // Ask for username when page loads
+    window.onload = () => {
+      username = prompt("Enter your name:").trim();
+      if (!username) username = "Anonymous";
+    };
+
+    socket.on("receive_message", (data) => {
+      const msgDiv = document.getElementById("messages");
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      msgDiv.innerHTML += `<p><strong>${data.user}</strong> [${time}]: ${data.message}</p>`;
+      msgDiv.scrollTop = msgDiv.scrollHeight;
+    });
+
+    function sendMessage() {
+      const input = document.getElementById("msgInput");
+      const message = input.value.trim();
+      if (message !== "") {
+        socket.emit("send_message", { user: username, message });
+        input.value = "";
+      }
+    }
+  </script>
+</body>
+</html>
