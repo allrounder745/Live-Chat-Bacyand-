@@ -2,87 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>💬 Premium Live Chat</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
+    html, body {
+      margin: 0; padding: 0; height: 100%;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      background: #000; /* Full black background */
       color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    h2 {
-      font-size: 2rem;
-      margin-bottom: 20px;
     }
     #chatBox {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+      width: 90vw;
+      max-width: 600px;
+      background: #111;
       border-radius: 15px;
-      width: 100%;
-      max-width: 500px;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
     }
     #messages {
-      height: 300px;
+      flex-grow: 1;
       overflow-y: auto;
-      padding-right: 10px;
-      margin-bottom: 10px;
+      background: #000;
       border-radius: 10px;
-      background-color: rgba(0, 0, 0, 0.3);
+      padding: 15px;
       scrollbar-width: thin;
-      scrollbar-color: #888 transparent;
+      scrollbar-color: #0f0 transparent;
     }
     #messages p {
-      margin-bottom: 8px;
-      text-align: left;
+      margin-bottom: 12px;
+      font-weight: 500;
     }
     #inputArea {
       display: flex;
+      margin-top: 15px;
       gap: 10px;
     }
-    input, button {
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      outline: none;
-      font-size: 1rem;
-    }
     #msgInput {
-      flex: 1;
+      flex-grow: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      background: #222;
+      color: #fff;
+    }
+    #msgInput::placeholder {
+      color: #888;
     }
     button {
-      background-color: #00c6ff;
-      color: white;
+      padding: 0 20px;
+      border-radius: 10px;
+      border: none;
+      background: #00ff00; /* Green send button */
+      color: #000;
+      font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: 0.2s;
     }
     button:hover {
-      background-color: #0079a1;
+      background: #0c0;
     }
   </style>
 </head>
 <body>
 
-  <h2>💬 Premium Live Chat</h2>
   <div id="chatBox">
     <div id="messages"></div>
     <div id="inputArea">
-      <input id="msgInput" placeholder="Type your message..." />
+      <input id="msgInput" placeholder="Type your message..." autocomplete="off" />
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
@@ -90,13 +85,7 @@
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     const socket = io("https://live-chat-9rtk.onrender.com");
-    let username = "";
-
-    // Ask for username when page loads
-    window.onload = () => {
-      username = prompt("Enter your name:").trim();
-      if (!username) username = "Anonymous";
-    };
+    const username = "Virat Kohli"; // Fixed username
 
     socket.on("receive_message", (data) => {
       const msgDiv = document.getElementById("messages");
@@ -105,14 +94,28 @@
       msgDiv.scrollTop = msgDiv.scrollHeight;
     });
 
+    function convertStickers(text) {
+      return text
+        .replace(/\b6\b/g, "🏏 SIX!")
+        .replace(/\b4\b/g, "🔥 FOUR!")
+        .replace(/\bwkt\b/gi, "☠️ WICKET!")
+        .replace(/\bwife\b/gi, "❤️ WIFEY!")
+        .replace(/\bmore\b/gi, "💯 MORE!");
+    }
+
     function sendMessage() {
       const input = document.getElementById("msgInput");
-      const message = input.value.trim();
-      if (message !== "") {
+      let message = input.value.trim();
+      if (message) {
+        message = convertStickers(message);
         socket.emit("send_message", { user: username, message });
         input.value = "";
       }
     }
+
+    document.getElementById("msgInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") sendMessage();
+    });
   </script>
 </body>
 </html>
